@@ -155,7 +155,8 @@ class RingBuffer(Sequence):
         return (len(self),) + self._arr.shape[1:]
 
     def clear(self):
-        if type(self._arr[0]) == np.float64:
+        # TODO: Support clearing N-dim arrays and different types
+        if isinstance(self._arr[0], np.float64):
             self._arr[:] = np.nan
         self._left_index = 0
         self._right_index = 0
