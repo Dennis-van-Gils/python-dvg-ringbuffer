@@ -188,8 +188,8 @@ class RingBuffer(Sequence):
                 raise IndexError(
                     "extend a RingBuffer such that it would overflow, with overwrite disabled"
                 )
-            elif not len(self):
-                return
+            # elif not len(self):
+            #    return
 
         self._is_unwrap_buffer_dirty = True
         if lv >= self._capacity:
@@ -223,10 +223,28 @@ class RingBuffer(Sequence):
         if not isinstance(item, tuple):
             item_arr = np.asarray(item)
             if issubclass(item_arr.dtype.type, np.integer):
-                if item_arr < 0:
-                    item_arr = (self._right_index + item_arr) % self._capacity
+
+                if item_arr.size == 1:
+                    if item_arr < 0:
+                        item_arr = (
+                            self._right_index + item_arr
+                        ) % self._capacity
+                    else:
+                        item_arr = (
+                            item_arr + self._left_index
+                        ) % self._capacity
                 else:
-                    item_arr = (item_arr + self._left_index) % self._capacity
+                    neg = np.where(item_arr < 0)
+                    pos = np.where(item_arr >= 0)
+
+                    if len(neg) > 0:
+                        item_arr[neg] = (
+                            self._right_index + item_arr[neg]
+                        ) % self._capacity
+                    if len(pos) > 0:
+                        item_arr[pos] = (
+                            item_arr[pos] + self._left_index
+                        ) % self._capacity
                 # print(item_arr)
                 return self._arr[item_arr]
 
