@@ -1,0 +1,15 @@
+graft docs
+graft src
+graft tests
+
+recursive-exclude docs/_build *
+recursive-exclude docs/_themes *
+
+include .coveragerc
+include .travis.yml .readthedocs.yml
+
+include LICENSE.txt
+include *.rst
+recursive-include images *.png
+
+global-exclude *.py[cod] __pycache__/* *.so *.dylib
