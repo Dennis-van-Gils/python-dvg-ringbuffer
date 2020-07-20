@@ -202,8 +202,10 @@ class RingBuffer(Sequence):
         ri = self._right_index % self._capacity
         sl1 = np.s_[ri : min(ri + lv, self._capacity)]
         sl2 = np.s_[: max(ri + lv - self._capacity, 0)]
-        self._arr[sl1] = values[: sl1.stop - sl1.start]
-        self._arr[sl2] = values[sl1.stop - sl1.start :]
+        # fmt: off
+        self._arr[sl1] = values[: sl1.stop - sl1.start]  # pylint: disable=no-member
+        self._arr[sl2] = values[sl1.stop - sl1.start :]  # pylint: disable=no-member
+        # fmt: on
         self._right_index += lv
 
         self._left_index = max(
