@@ -79,7 +79,7 @@ container -- needs to be transformed into a numpy array. Because
 Methods
 -------
 * ``clear()``
-* ``append()``
+* ``append(value)``
     Append a single value to the ring buffer.
 
     .. code-block:: python
@@ -90,7 +90,7 @@ Methods
         rb.append(3)                      #  [1, 2, 3]
         rb.append(4)                      #  [2, 3, 4]
 
-* ``appendleft()``
+* ``appendleft(value)``
     Append a single value to the ring buffer from the left side.
 
     .. code-block:: python
@@ -101,7 +101,7 @@ Methods
         rb.appendleft(3)                  #  [3, 2, 1]
         rb.appendleft(4)                  #  [4, 3, 2]
 
-* ``extend()``
+* ``extend(values)``
     Extend the ring buffer with a list of values.
 
     .. code-block:: python
@@ -111,7 +111,7 @@ Methods
         rb.extend([2, 3])                 #  [1, 2, 3]
         rb.extend([4, 5, 6, 7])           #  [5, 6, 7]
 
-* ``extendleft()``
+* ``extendleft(values)``
     Extend the ring buffer with a list of values from the left side.
 
     .. code-block:: python
