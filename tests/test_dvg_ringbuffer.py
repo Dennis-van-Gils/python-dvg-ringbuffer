@@ -8,7 +8,13 @@ class TestAll(unittest.TestCase):
         r = RingBuffer(5)
         self.assertEqual(r.dtype, np.dtype(np.float64))
 
+        r.clear()
+        self.assertEqual(r.dtype, np.dtype(np.float64))
+
         r = RingBuffer(5, dtype=np.bool)
+        self.assertEqual(r.dtype, np.dtype(np.bool))
+
+        r.clear()
         self.assertEqual(r.dtype, np.dtype(np.bool))
 
     def test_sizes(self):
@@ -82,11 +88,14 @@ class TestAll(unittest.TestCase):
 
     def test_extend(self):
         r = RingBuffer(5)
+
         r.extend([1, 2, 3])
         np.testing.assert_equal(r, np.array([1, 2, 3]))
+
         r.popleft()
         r.extend([4, 5, 6])
         np.testing.assert_equal(r, np.array([2, 3, 4, 5, 6]))
+
         r.extendleft([0, 1])
         np.testing.assert_equal(r, np.array([0, 1, 2, 3, 4]))
 
@@ -111,13 +120,9 @@ class TestAll(unittest.TestCase):
 
         # test empty pops
         empty = RingBuffer(1)
-        with self.assertRaisesRegex(
-            IndexError, "Pop from an empty RingBuffer."
-        ):
+        with self.assertRaisesRegex(IndexError, "empty"):
             empty.pop()
-        with self.assertRaisesRegex(
-            IndexError, "Pop from an empty RingBuffer."
-        ):
+        with self.assertRaisesRegex(IndexError, "empty"):
             empty.popleft()
 
     def test_2d(self):
@@ -144,6 +149,12 @@ class TestAll(unittest.TestCase):
 
     def test_iter(self):
         r = RingBuffer(5)
+        for i in range(3):
+            r.append(i)
+        for i, j in zip(r, range(3)):
+            self.assertEqual(i, j)
+
+        r.clear()
         for i in range(5):
             r.append(i)
         for i, j in zip(r, range(5)):
@@ -187,8 +198,53 @@ class TestAll(unittest.TestCase):
         try:
             r.append(0)
             r.appendleft(0)
+            r.extend([0])
+            r.extendleft([0])
         except IndexError:
             self.fail()
+
+    def test_addresses(self):
+        r = RingBuffer(5)
+        r.extend([1, 2, 3])
+        np.testing.assert_equal(r, np.array([1, 2, 3]))
+        self.assertNotEqual(r.current_address, r.unwrap_address)
+
+        r.popleft()
+        r.extend([4, 5, 6])
+        np.testing.assert_equal(r, np.array([2, 3, 4, 5, 6]))
+        self.assertEqual(r.current_address, r.unwrap_address)
+
+        r.extendleft([0, 1])
+        np.testing.assert_equal(r, np.array([0, 1, 2, 3, 4]))
+        self.assertEqual(r.current_address, r.unwrap_address)
+
+        r.extendleft([1, 2, 3, 4, 5, 6, 7])
+        np.testing.assert_equal(r, np.array([1, 2, 3, 4, 5]))
+        self.assertEqual(r.current_address, r.unwrap_address)
+
+        r.extend([1, 2, 3, 4, 5, 6, 7])
+        np.testing.assert_equal(r, np.array([3, 4, 5, 6, 7]))
+        self.assertEqual(r.current_address, r.unwrap_address)
+
+        r.clear()
+        np.testing.assert_equal(r, np.array([]))
+        np.testing.assert_equal(len(r), 0)
+        self.assertNotEqual(r.current_address, r.unwrap_address)
+
+    def test_errors(self):
+        r = RingBuffer(5)
+
+        r.extend([1, 2, 3, 4, 5])
+        with self.assertRaisesRegex(TypeError, "integers"):
+            r[2.0]
+        with self.assertRaisesRegex(IndexError, "out of range"):
+            r[5]
+        with self.assertRaisesRegex(IndexError, "out of range"):
+            r[np.array([-6, 5])]
+
+        r.clear()
+        with self.assertRaisesRegex(IndexError, "length 0"):
+            r[2]
 
 
 if not hasattr(TestAll, "assertRaisesRegex"):
