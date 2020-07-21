@@ -56,15 +56,76 @@ container -- needs to be transformed into a numpy array. Because
       values in the returned data array is identical to changing values in the
       *unwrap* buffer.
 
+``RingBuffer(capacity, dtype=np.float64, allow_overwrite=True)``
+----------------------------------------------------------------
+    Create a new ring buffer with the given capacity and element type.
+
+        Args:
+            capacity (``int``):
+                The maximum capacity of the ring buffer
+
+            dtype (``data-type``, optional):
+                Desired type of buffer elements. Use a type like ``(float, 2)``
+                to produce a buffer with shape ``(N, 2)``.
+
+                Default: ``np.float64``
+
+            allow_overwrite (``bool``, optional):
+                If ``False``, throw an IndexError when trying to append to an
+                already full buffer.
+
+                Default: ``True``
+
 Methods
 -------
 * ``clear()``
 * ``append()``
+    Append a single value to the ring buffer.
+
+    .. code-block:: python
+
+        rb = RingBuffer(3, dtype=np.int)  #  []
+        rb.append(1)                      #  [1]
+        rb.append(2)                      #  [1, 2]
+        rb.append(3)                      #  [1, 2, 3]
+        rb.append(4)                      #  [2, 3, 4]
+
 * ``appendleft()``
+    Append a single value to the ring buffer from the left side.
+
+    .. code-block:: python
+
+        rb = RingBuffer(3, dtype=np.int)  #  []
+        rb.appendleft(1)                  #  [1]
+        rb.appendleft(2)                  #  [2, 1]
+        rb.appendleft(3)                  #  [3, 2, 1]
+        rb.appendleft(4)                  #  [4, 3, 2]
+
 * ``extend()``
+    Extend the ring buffer with a list of values.
+
+    .. code-block:: python
+
+        rb = RingBuffer(3, dtype=np.int)  #  []
+        rb.extend([1])                    #  [1]
+        rb.extend([2, 3])                 #  [1, 2, 3]
+        rb.extend([4, 5, 6, 7])           #  [5, 6, 7]
+
 * ``extendleft()``
+    Extend the ring buffer with a list of values from the left side.
+
+    .. code-block:: python
+
+        rb = RingBuffer(3, dtype=np.int)  #  []
+        rb.extendleft([1])                #  [1]
+        rb.extendleft([3, 2])             #  [3, 2, 1]
+        rb.extendleft([7, 6, 5, 4])       #  [7, 6, 5]
+
 * ``pop()``
+    Remove the right-most item from the ring buffer and return it.
+
 * ``popleft()``
+    Remove the left-most item from the ring buffer and return it.
 
 Properties
 ----------
@@ -78,3 +139,20 @@ Properties
 Indexing & slicing
 ------------------
 * ``[]`` including negative indices and slicing
+
+    .. code-block:: python
+
+        rb = RingBuffer(4, dtype=np.int)  # --> rb[:] = array([], dtype=int32)
+        rb.extend([1, 2, 3, 4, 5])        # --> rb[:] = array([2, 3, 4, 5])
+        x = rb[0]                         # --> x = 2
+        x = rb[-1]                        # --> x = 5
+        x = rb[:3]                        # --> x = array([2, 3, 4])
+        x = rb[np.array([0, 2, -1])]      # --> x = array([2, 4, 5])
+
+        rb = RingBuffer(5, dtype=(np.int, 2))  # --> rb[:] = array([], shape=(0, 2), dtype=int32)
+        rb.append([1, 2])                      # --> rb[:] = array([[1, 2]])
+        rb.append([3, 4])                      # --> rb[:] = array([[1, 2], [3, 4]])
+        rb.append([5, 6])                      # --> rb[:] = array([[1, 2], [3, 4], [5, 6]])
+        x = rb[0]                              # --> x = array([1, 2])
+        x = rb[0, :]                           # --> x = array([1, 2])
+        x = rb[:, 0]                           # --> x = array([1, 3, 5])
