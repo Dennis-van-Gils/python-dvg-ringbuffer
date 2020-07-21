@@ -34,7 +34,7 @@ Based on:
     ``numpy_ringbuffer`` and provides several optimizations and extra features,
     but requires Python 3.
 
-If, and only if the ring buffer is completely full, will it return its array
+If and only if the ring buffer is completely full, will it return its array
 data as a contiguous C-style numpy array at a single fixed memory address per
 ring buffer instance. It does so by unwrapping the discontiguous ring buffer
 array into a second extra *unwrap* buffer that is a private member of the ring
