@@ -36,7 +36,8 @@ Based on
 --------
 https://pypi.org/project/numpy_ringbuffer/ by Eric Wieser.
 
-DvG_RingBuffer can be used as a drop-in replacement for numpy_ringbuffer.
+``DvG_RingBuffer`` can be used as a drop-in replacement for ``numpy_ringbuffer``
+and provides several optimizations and extra features.
 
 Methods
 -------
@@ -140,6 +141,8 @@ class RingBuffer(Sequence):
                 raise IndexError(
                     "Append to a full RingBuffer with overwrite disabled."
                 )
+            if self._N == 0:
+                return  # Mimick behavior of deque(maxlen=0)
             self._idx_L += 1
 
         self._unwrap_buffer_is_dirty = True
@@ -161,6 +164,8 @@ class RingBuffer(Sequence):
                 raise IndexError(
                     "Append to a full RingBuffer with overwrite disabled."
                 )
+            if self._N == 0:
+                return  # Mimick behavior of deque(maxlen=0)
             self._idx_R -= 1
 
         self._unwrap_buffer_is_dirty = True
@@ -186,6 +191,8 @@ class RingBuffer(Sequence):
                 raise IndexError(
                     "RingBuffer overflows, because overwrite is disabled."
                 )
+            if self._N == 0:
+                return  # Mimick behavior of deque(maxlen=0)
 
         self._unwrap_buffer_is_dirty = True
         if lv >= self._N:
@@ -219,6 +226,8 @@ class RingBuffer(Sequence):
                 raise IndexError(
                     "RingBuffer overflows, because overwrite is disabled."
                 )
+            if self._N == 0:
+                return  # Mimick behavior of deque(maxlen=0)
 
         self._unwrap_buffer_is_dirty = True
         if lv >= self._N:
@@ -369,11 +378,11 @@ class RingBuffer(Sequence):
 
         if isinstance(item, (slice, tuple)) or item is None:
             if self.is_full:
-                print("  --> _unwrap_buffer[item]")
+                # print("  --> _unwrap_buffer[item]")
                 self._unwrap_into_buffer()
                 return self._unwrap_buffer[item]
 
-            print("  --> _unwrap()[item]")
+            # print("  --> _unwrap()[item]")
             return self._unwrap()[item]
 
         # ----------------------------------
@@ -381,56 +390,55 @@ class RingBuffer(Sequence):
         #   ringbuffer[list of ints]
         #   ringbuffer[np.ndarray of ints]
         # ----------------------------------
-
-        if hasattr(item, "__len__"):
-            item_arr = np.asarray(item)
-        else:
-            item_arr = np.asarray([item])
+        item_arr = np.asarray(item)
 
         if not issubclass(item_arr.dtype.type, np.integer):
             raise TypeError("RingBuffer indices must be integers.")
 
-        # Check for `List index out of range`
         if len(self) == 0:
             raise IndexError(
                 "RingBuffer list index out of range. The RingBuffer has "
                 "length 0."
             )
 
-        if np.any(item_arr < -len(self)) or np.any(item_arr >= len(self)):
-            idx_under = item_arr[np.where(item_arr < -len(self))]
-            idx_over = item_arr[np.where(item_arr >= len(self))]
-            idx_oor = np.sort(np.concatenate((idx_under, idx_over)))
-            raise IndexError(
-                "RingBuffer list %s %s out of range. The RingBuffer has "
-                "length %s."
-                % (
-                    "index" if len(idx_oor) == 1 else "indices",
-                    idx_oor,
-                    len(self),
-                )
-            )
-
-        # Retrieve elements
-        if item_arr.size == 1:
+        if not hasattr(item, "__len__"):
             # Single element: We can speed up the code
-            print("  --> single element")
+            # print("  --> single element")
+
+            # Check for `List index out of range`
+            if item_arr < -len(self) or item_arr >= len(self):
+                raise IndexError(
+                    "RingBuffer list index %s out of range. The RingBuffer "
+                    "has length %s." % (item_arr, len(self))
+                )
+
             if item_arr < 0:
                 item_arr = (self._idx_R + item_arr) % self._N
             else:
                 item_arr = (item_arr + self._idx_L) % self._N
+
         else:
             # Multiple elements
-            print("  --> multiple elements")
-            neg = np.where(item_arr < 0)
-            pos = np.where(item_arr >= 0)
+            # print("  --> multiple elements")
 
-            if len(neg) > 0:
-                item_arr[neg] = (self._idx_R + item_arr[neg]) % self._N
-            if len(pos) > 0:
-                item_arr[pos] = (item_arr[pos] + self._idx_L) % self._N
+            # Check for `List index out of range`
+            if np.any(item_arr < -len(self)) or np.any(item_arr >= len(self)):
+                idx_under = item_arr[np.where(item_arr < -len(self))]
+                idx_over = item_arr[np.where(item_arr >= len(self))]
+                idx_oor = np.sort(np.concatenate((idx_under, idx_over)))
+                raise IndexError(
+                    "RingBuffer list indices %s out of range. The RingBuffer "
+                    "has length %s." % (idx_oor, len(self))
+                )
+            idx_neg = np.where(item_arr < 0)
+            idx_pos = np.where(item_arr >= 0)
 
-        print("  --> _arr[item_arr]")
+            if len(idx_neg) > 0:
+                item_arr[idx_neg] = (self._idx_R + item_arr[idx_neg]) % self._N
+            if len(idx_pos) > 0:
+                item_arr[idx_pos] = (item_arr[idx_pos] + self._idx_L) % self._N
+
+        # print("  --> _arr[item_arr]")
         return self._arr[item_arr]
 
     def __iter__(self):
