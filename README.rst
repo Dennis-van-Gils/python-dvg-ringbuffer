@@ -19,7 +19,15 @@ DvG_RingBuffer
 Numpy ring buffer at a *fixed* memory address to allow for significantly
 sped up ``numpy``, ``sigpy``, ``numba`` & ``pyFFTW``  calculations.
 
-**Based on:**
+- Github: https://github.com/Dennis-van-Gils/python-dvg-ringbuffer
+- PyPI: https://pypi.org/project/dvg-ringbuffer
+
+Installation:
+
+    ``pip install dvg-ringbuffer``
+
+Based on:
+
     https://pypi.org/project/numpy_ringbuffer/ by Eric Wieser.
 
     ``DvG_RingBuffer`` can be used as a drop-in replacement for
@@ -141,6 +149,8 @@ Indexing & slicing
 * ``[]`` including negative indices and slicing
 
     .. code-block:: python
+
+        from dvg_ringbuffer import RingBuffer
 
         rb = RingBuffer(4, dtype=np.int)  # --> rb[:] = array([], dtype=int32)
         rb.extend([1, 2, 3, 4, 5])        # --> rb[:] = array([2, 3, 4, 5])
