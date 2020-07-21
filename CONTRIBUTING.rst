@@ -2,39 +2,39 @@
 Contributing
 ============
 
-Contributions are welcome, and they are greatly appreciated! Every little bit 
+Contributions are welcome, and they are greatly appreciated! Every little bit
 helps, and credit will always be given.
 
 Bug reports
 ===========
 
-When `reporting a bug 
-<https://github.com/Dennis-van-Gils/python-dvg-ringbuffer/issues>`_ 
+When `reporting a bug
+<https://github.com/Dennis-van-Gils/python-dvg-ringbuffer/issues>`_
 please include:
 
     * Your operating system name and version.
-    * Any details about your local setup that might be helpful in 
+    * Any details about your local setup that might be helpful in
       troubleshooting.
     * Detailed steps to reproduce the bug.
 
 Documentation improvements
 ==========================
 
-``DvG_RingBuffer`` could always use more documentation, whether as part of the 
+``DvG_RingBuffer`` could always use more documentation, whether as part of the
 official docs, in docstrings, or even on the web in blog posts, articles, and
 such.
 
 Feature requests and feedback
 =============================
 
-The best way to send feedback is to file an issue at 
+The best way to send feedback is to file an issue at
 https://github.com/Dennis-van-Gils/python-dvg-ringbuffer/issues.
 
 If you are proposing a feature:
 
 * Explain in detail how it would work.
 * Keep the scope as narrow as possible, to make it easier to implement.
-* Remember that this is a volunteer-driven project, and that code 
+* Remember that this is a volunteer-driven project, and that code
   contributions are welcome :)
 
 Development
@@ -42,7 +42,8 @@ Development
 
 To set up `python-dvg-ringbuffer` for local development:
 
-1. Fork `python-dvg-ringbuffer <https://github.com/Dennis-van-Gils/python-dvg-ringbuffer>`_
+1. Fork `python-dvg-ringbuffer
+   <https://github.com/Dennis-van-Gils/python-dvg-ringbuffer>`_
    (look for the "Fork" button).
 2. Clone your fork locally::
 
@@ -69,7 +70,7 @@ To set up `python-dvg-ringbuffer` for local development:
 Pull Request Guidelines
 -----------------------
 
-If you need some code review or feedback while you're developing the code just 
+If you need some code review or feedback while you're developing the code just
 make the pull request.
 
 For merging, you should:
@@ -80,5 +81,6 @@ For merging, you should:
 4. Add yourself to ``AUTHORS.rst``.
 
 .. [1] You can rely on Travis - it will
-       `run the tests <https://travis-ci.org/github/Dennis-van-Gils/python-dvg-ringbuffer/pull_requests>`_
+       `run the tests
+       <https://travis-ci.org/github/Dennis-van-Gils/python-dvg-ringbuffer/pull_requests>`_
        for each change you add in the pull request.
