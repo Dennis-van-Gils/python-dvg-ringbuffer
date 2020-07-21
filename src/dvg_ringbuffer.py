@@ -36,6 +36,8 @@ Based on
 --------
 https://pypi.org/project/numpy_ringbuffer/ by Eric Wieser.
 
+DvG_RingBuffer can be used as a drop-in replacement for numpy_ringbuffer.
+
 Methods
 -------
 * ``clear()``
@@ -43,12 +45,14 @@ Methods
 * ``appendleft()``
 * ``extend()``
 * ``extendleft()``
+* ``pop()``
+* ``popleft()``
 
 Properties
 ----------
 * ``is_full``
-* ``fixed_memaddr``
-* ``current_memaddr``
+* ``unwrap_address``
+* ``current_address``
 * ``dtype``
 * ``shape``
 * ``maxlen``
@@ -235,6 +239,27 @@ class RingBuffer(Sequence):
         self._idx_R = min(self._idx_R, self._idx_L + self._N)
 
     # --------------------------------------------------------------------------
+    #   pop
+    # --------------------------------------------------------------------------
+
+    def pop(self):
+        if len(self) == 0:
+            raise IndexError("Pop from an empty RingBuffer.")
+        self._unwrap_buffer_is_dirty = True
+        self._idx_R -= 1
+        self._fix_indices()
+        return self._arr[self._idx_R % self._N]
+
+    def popleft(self):
+        if len(self) == 0:
+            raise IndexError("Pop from an empty RingBuffer.")
+        self._unwrap_buffer_is_dirty = True
+        res = self._arr[self._idx_L]
+        self._idx_L += 1
+        self._fix_indices()
+        return res
+
+    # --------------------------------------------------------------------------
     #   Properties
     # --------------------------------------------------------------------------
 
@@ -243,14 +268,14 @@ class RingBuffer(Sequence):
         return len(self) == self._N
 
     @property
-    def fixed_memaddr(self):
+    def unwrap_address(self):
         """Get the fixed memory address of the internal unwrap buffer, used when
         the ring buffer is completely full.
         """
         return self._unwrap_buffer[:].__array_interface__["data"][0]
 
     @property
-    def current_memaddr(self):
+    def current_address(self):
         """Get the current memory address of the array behind the buffer.
         """
         return self[:].__array_interface__["data"][0]
@@ -344,11 +369,11 @@ class RingBuffer(Sequence):
 
         if isinstance(item, (slice, tuple)) or item is None:
             if self.is_full:
-                # print("  --> _unwrap_buffer[item]")
+                print("  --> _unwrap_buffer[item]")
                 self._unwrap_into_buffer()
                 return self._unwrap_buffer[item]
 
-            # print("  --> _unwrap()[item]")
+            print("  --> _unwrap()[item]")
             return self._unwrap()[item]
 
         # ----------------------------------
@@ -389,12 +414,14 @@ class RingBuffer(Sequence):
         # Retrieve elements
         if item_arr.size == 1:
             # Single element: We can speed up the code
+            print("  --> single element")
             if item_arr < 0:
                 item_arr = (self._idx_R + item_arr) % self._N
             else:
                 item_arr = (item_arr + self._idx_L) % self._N
         else:
             # Multiple elements
+            print("  --> multiple elements")
             neg = np.where(item_arr < 0)
             pos = np.where(item_arr >= 0)
 
@@ -403,7 +430,7 @@ class RingBuffer(Sequence):
             if len(pos) > 0:
                 item_arr[pos] = (item_arr[pos] + self._idx_L) % self._N
 
-        # print("  --> _arr[item_arr]")
+        print("  --> _arr[item_arr]")
         return self._arr[item_arr]
 
     def __iter__(self):
