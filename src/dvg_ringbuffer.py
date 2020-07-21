@@ -38,19 +38,30 @@ https://pypi.org/project/numpy_ringbuffer/ by Eric Wieser.
 
 Methods
 -------
-* ``append()``
-* ``extend()``
 * ``clear()``
-* ``is_full()``
-* ``dtype()``
-* ``shape()``
-* ``maxlen()``
-* ``[]``-indexing including negative indices
+* ``append()``
+* ``appendleft()``
+* ``extend()``
+* ``extendleft()``
+
+Properties
+----------
+* ``is_full``
+* ``fixed_memaddr``
+* ``current_memaddr``
+* ``dtype``
+* ``shape``
+* ``maxlen``
+
+Indexing & slicing
+------------------
+* ``[]`` including negative indices and slicing
+
 """
 __author__ = "Dennis van Gils"
 __authoremail__ = "vangils.dennis@gmail.com"
 __url__ = "https://github.com/Dennis-van-Gils/python-dvg-ringbuffer"
-__date__ = "20-07-2020"
+__date__ = "21-07-2020"
 __version__ = "1.0.0"
 
 from collections.abc import Sequence
@@ -59,92 +70,190 @@ import numpy as np
 
 class RingBuffer(Sequence):
     def __init__(self, capacity, dtype=np.float64, allow_overwrite=True):
-        """
-        Create a new ring buffer with the given capacity and element type
+        """Create a new ring buffer with the given capacity and element type.
 
-        Parameters
-        ----------
-        capacity: int
-            The maximum capacity of the ring buffer
-        dtype: data-type, optional
-            Desired type of buffer elements. Use a type like (float, 2) to
-            produce a buffer with shape (N, 2)
-        allow_overwrite: bool
-            If false, throw an IndexError when trying to append to an alread
-            full buffer
+        Args:
+            capacity (int):
+                The maximum capacity of the ring buffer
+
+            dtype (data-type, optional):
+                Desired type of buffer elements. Use a type like (float, 2) to
+                produce a buffer with shape (N, 2).
+
+                Default: np.float64
+
+            allow_overwrite (bool, optional):
+                If False, throw an IndexError when trying to append to an
+                already full buffer.
+
+                Default: True
         """
         if dtype == np.float64:
-            self._arr = np.full(capacity, np.nan, order="C")
+            p = {"shape": capacity, "fill_value": np.nan, "order": "C"}
+            self._arr = np.full(**p)
+            self._unwrap_buffer = np.full(**p)  # @ fixed memory address
         else:
-            self._arr = np.empty(capacity, dtype, order="C")
+            p = {"shape": capacity, "dtype": dtype, "order": "C"}
+            self._arr = np.zeros(**p)
+            self._unwrap_buffer = np.zeros(**p)  # @ fixed memory address
 
-        self._left_index = 0
-        self._right_index = 0
-        self._capacity = capacity
+        self._N = capacity
         self._allow_overwrite = allow_overwrite
+        self._idx_L = 0  # left index
+        self._idx_R = 0  # right index
+        self._unwrap_buffer_is_dirty = False
 
-        if dtype == np.float64:
-            self._unwrap_buffer = np.full(capacity, np.nan, order="C")
+    # --------------------------------------------------------------------------
+    #   clear
+    # --------------------------------------------------------------------------
+
+    def clear(self):
+        self._idx_L = 0
+        self._idx_R = 0
+
+        if self._arr.dtype == np.float64:
+            self._arr.fill(np.nan)
+            self._unwrap_buffer.fill(np.nan)
         else:
-            self._unwrap_buffer = np.empty(capacity, dtype, order="C")
-        self._is_unwrap_buffer_dirty = False
+            self._arr.fill(0)
+            self._unwrap_buffer.fill(0)
 
-    def _unwrap(self):
-        """ Copy the data from this buffer into unwrapped form """
+    # --------------------------------------------------------------------------
+    #   append
+    # --------------------------------------------------------------------------
 
-        return np.concatenate(
-            (
-                self._arr[
-                    self._left_index : min(self._right_index, self._capacity)
-                ],
-                self._arr[: max(self._right_index - self._capacity, 0)],
-            )
-        )
+    def append(self, value):
+        """Append a single value to the ring buffer.
 
-    def _unwrap_into_buffer(self):
-        """ Copy the data from this buffer into unwrapped form """
-        if self._is_unwrap_buffer_dirty:
-            # print("was dirty")
-            np.concatenate(
-                (
-                    self._arr[
-                        self._left_index : min(
-                            self._right_index, self._capacity
-                        )
-                    ],
-                    self._arr[: max(self._right_index - self._capacity, 0)],
-                ),
-                out=self._unwrap_buffer,
-            )
-            self._is_unwrap_buffer_dirty = False
-        else:
-            # print("was clean")
-            pass
-
-    def _fix_indices(self):
+        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
+        rb.append(1)                      # --> rb = [1]
+        rb.append(2)                      # --> rb = [1, 2]
+        rb.append(3)                      # --> rb = [1, 2, 3]
+        rb.append(4)                      # --> rb = [2, 3, 4]
         """
-        Enforce our invariant that 0 <= self._left_index < self._capacity
+        if self.is_full:
+            if not self._allow_overwrite:
+                raise IndexError(
+                    "Append to a full RingBuffer with overwrite disabled."
+                )
+            self._idx_L += 1
+
+        self._unwrap_buffer_is_dirty = True
+        self._arr[self._idx_R % self._N] = value
+        self._idx_R += 1
+        self._fix_indices()
+
+    def appendleft(self, value):
+        """Append a single value to the ring buffer from the left side.
+
+        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
+        rb.appendleft(1)                  # --> rb = [1]
+        rb.appendleft(2)                  # --> rb = [2, 1]
+        rb.appendleft(3)                  # --> rb = [3, 2, 1]
+        rb.appendleft(4)                  # --> rb = [4, 3, 2]
         """
-        if self._left_index >= self._capacity:
-            self._left_index -= self._capacity
-            self._right_index -= self._capacity
-        elif self._left_index < 0:
-            self._left_index += self._capacity
-            self._right_index += self._capacity
+        if self.is_full:
+            if not self._allow_overwrite:
+                raise IndexError(
+                    "Append to a full RingBuffer with overwrite disabled."
+                )
+            self._idx_R -= 1
+
+        self._unwrap_buffer_is_dirty = True
+        self._idx_L -= 1
+        self._fix_indices()
+        self._arr[self._idx_L] = value
+
+    # --------------------------------------------------------------------------
+    #   extend
+    # --------------------------------------------------------------------------
+
+    def extend(self, values):
+        """Extend the ring buffer with a list of values.
+
+        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
+        rb.extend([1])                    # --> rb = [1]
+        rb.extend([2, 3])                 # --> rb = [1, 2, 3]
+        rb.extend([4, 5, 6, 7])           # --> rb = [5, 6, 7]
+        """
+        lv = len(values)
+        if len(self) + lv > self._N:
+            if not self._allow_overwrite:
+                raise IndexError(
+                    "RingBuffer overflows, because overwrite is disabled."
+                )
+
+        self._unwrap_buffer_is_dirty = True
+        if lv >= self._N:
+            self._arr[...] = values[-self._N :]
+            self._idx_R = self._N
+            self._idx_L = 0
+            return
+
+        ri = self._idx_R % self._N
+        sl1 = np.s_[ri : min(ri + lv, self._N)]
+        sl2 = np.s_[: max(ri + lv - self._N, 0)]
+        # fmt: off
+        self._arr[sl1] = values[: sl1.stop - sl1.start]  # pylint: disable=no-member
+        self._arr[sl2] = values[sl1.stop - sl1.start :]  # pylint: disable=no-member
+        # fmt: on
+        self._idx_R += lv
+        self._idx_L = max(self._idx_L, self._idx_R - self._N)
+        self._fix_indices()
+
+    def extendleft(self, values):
+        """Extend the ring buffer with a list of values from the left side.
+
+        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
+        rb.extendleft([1])                # --> rb = [1]
+        rb.extendleft([3, 2])             # --> rb = [3, 2, 1]
+        rb.extendleft([7, 6, 5, 4])       # --> rb = [7, 6, 5]
+        """
+        lv = len(values)
+        if len(self) + lv > self._N:
+            if not self._allow_overwrite:
+                raise IndexError(
+                    "RingBuffer overflows, because overwrite is disabled."
+                )
+
+        self._unwrap_buffer_is_dirty = True
+        if lv >= self._N:
+            self._arr[...] = values[: self._N]
+            self._idx_R = self._N
+            self._idx_L = 0
+            return
+
+        self._idx_L -= lv
+        self._fix_indices()
+        li = self._idx_L
+        sl1 = np.s_[li : min(li + lv, self._N)]
+        sl2 = np.s_[: max(li + lv - self._N, 0)]
+        # fmt: off
+        self._arr[sl1] = values[:sl1.stop - sl1.start]  # pylint: disable=no-member
+        self._arr[sl2] = values[sl1.stop - sl1.start:]  # pylint: disable=no-member
+        # fmt: on
+        self._idx_R = min(self._idx_R, self._idx_L + self._N)
+
+    # --------------------------------------------------------------------------
+    #   Properties
+    # --------------------------------------------------------------------------
 
     @property
     def is_full(self):
-        """ True if there is no more space in the buffer """
-        return len(self) == self._capacity
+        return len(self) == self._N
 
-    # numpy compatibility
-    def __array__(self):
-        # print("__array__")
-        if self.is_full:
-            self._unwrap_into_buffer()
-            return self._unwrap_buffer
-        else:
-            return self._unwrap()
+    @property
+    def fixed_memaddr(self):
+        """Get the fixed memory address of the internal unwrap buffer, used when
+        the ring buffer is completely full.
+        """
+        return self._unwrap_buffer[:].__array_interface__["data"][0]
+
+    @property
+    def current_memaddr(self):
+        """Get the current memory address of the array behind the buffer.
+        """
+        return self[:].__array_interface__["data"][0]
 
     @property
     def dtype(self):
@@ -154,107 +263,148 @@ class RingBuffer(Sequence):
     def shape(self):
         return (len(self),) + self._arr.shape[1:]
 
-    def clear(self):
-        # TODO: Support clearing N-dim arrays and different types
-        if isinstance(self._arr[0], np.float64):
-            self._arr[:] = np.nan
-        self._left_index = 0
-        self._right_index = 0
-
-    # these mirror methods from deque
     @property
     def maxlen(self):
-        return self._capacity
+        return self._N
 
-    def append(self, value):
-        if self.is_full:
-            if not self._allow_overwrite:
-                raise IndexError(
-                    "append to a full RingBuffer with overwrite disabled"
-                )
-            elif not len(self):
-                return
-            else:
-                self._left_index += 1
+    # --------------------------------------------------------------------------
+    #   _unwrap
+    # --------------------------------------------------------------------------
 
-        self._is_unwrap_buffer_dirty = True
-        self._arr[self._right_index % self._capacity] = value
-        self._right_index += 1
-        self._fix_indices()
-
-    def extend(self, values):
-        lv = len(values)
-        if len(self) + lv > self._capacity:
-            if not self._allow_overwrite:
-                raise IndexError(
-                    "extend a RingBuffer such that it would overflow, with overwrite disabled"
-                )
-            # elif not len(self):
-            #    return
-
-        self._is_unwrap_buffer_dirty = True
-        if lv >= self._capacity:
-            # wipe the entire array! - this may not be threadsafe
-            self._arr[...] = values[-self._capacity :]
-            self._right_index = self._capacity
-            self._left_index = 0
-            return
-
-        ri = self._right_index % self._capacity
-        sl1 = np.s_[ri : min(ri + lv, self._capacity)]
-        sl2 = np.s_[: max(ri + lv - self._capacity, 0)]
-        # fmt: off
-        self._arr[sl1] = values[: sl1.stop - sl1.start]  # pylint: disable=no-member
-        self._arr[sl2] = values[sl1.stop - sl1.start :]  # pylint: disable=no-member
-        # fmt: on
-        self._right_index += lv
-
-        self._left_index = max(
-            self._left_index, self._right_index - self._capacity
+    def _unwrap(self):
+        """Copy the data from this buffer into unwrapped form.
+        """
+        return np.concatenate(
+            (
+                self._arr[self._idx_L : min(self._idx_R, self._N)],
+                self._arr[: max(self._idx_R - self._N, 0)],
+            )
         )
-        self._fix_indices()
 
-    # implement Sequence methods
-    def __len__(self):
-        return self._right_index - self._left_index
+    # --------------------------------------------------------------------------
+    #   _unwrap_into_buffer
+    # --------------------------------------------------------------------------
 
-    def __getitem__(self, item):
-        # handle simple (b[1]) and basic (b[np.array([1, 2, 3])]) fancy indexing specially
-        # print("__get_item__")
-        if not isinstance(item, tuple):
-            item_arr = np.asarray(item)
-            if issubclass(item_arr.dtype.type, np.integer):
+    def _unwrap_into_buffer(self):
+        """Copy the data from this buffer into unwrapped form to the unwrap
+        buffer at a fixed memory address. Only call when the buffer is full.
+        """
+        if self._unwrap_buffer_is_dirty:
+            # print("Unwrap buffer was dirty")
+            np.concatenate(
+                (
+                    self._arr[self._idx_L : min(self._idx_R, self._N)],
+                    self._arr[: max(self._idx_R - self._N, 0)],
+                ),
+                out=self._unwrap_buffer,
+            )
+            self._unwrap_buffer_is_dirty = False
+        else:
+            # print("Unwrap buffer was clean")
+            pass
 
-                if item_arr.size == 1:
-                    if item_arr < 0:
-                        item_arr = (
-                            self._right_index + item_arr
-                        ) % self._capacity
-                    else:
-                        item_arr = (
-                            item_arr + self._left_index
-                        ) % self._capacity
-                else:
-                    neg = np.where(item_arr < 0)
-                    pos = np.where(item_arr >= 0)
+    # --------------------------------------------------------------------------
+    #   _fix_indices
+    # --------------------------------------------------------------------------
 
-                    if len(neg) > 0:
-                        item_arr[neg] = (
-                            self._right_index + item_arr[neg]
-                        ) % self._capacity
-                    if len(pos) > 0:
-                        item_arr[pos] = (
-                            item_arr[pos] + self._left_index
-                        ) % self._capacity
-                # print(item_arr)
-                return self._arr[item_arr]
+    def _fix_indices(self):
+        """Enforce our invariant that 0 <= self._idx_L < self._N.
+        """
+        if self._idx_L >= self._N:
+            self._idx_L -= self._N
+            self._idx_R -= self._N
+        elif self._idx_L < 0:
+            self._idx_L += self._N
+            self._idx_R += self._N
 
-        # print("  __something_else__")
+    # --------------------------------------------------------------------------
+    #   Dunder methods
+    # --------------------------------------------------------------------------
+
+    def __array__(self):
+        """Numpy compatibility
+        """
+        # print("__array__")
         if self.is_full:
             self._unwrap_into_buffer()
-            return self._unwrap_buffer[item]
+            return self._unwrap_buffer
         else:
+            return self._unwrap()
+
+    def __len__(self):
+        return self._idx_R - self._idx_L
+
+    def __getitem__(self, item):
+
+        # --------------------------
+        #   ringbuffer[slice]
+        #   ringbuffer[tuple]
+        #   ringbuffer[None]
+        # --------------------------
+
+        if isinstance(item, (slice, tuple)) or item is None:
+            if self.is_full:
+                # print("  --> _unwrap_buffer[item]")
+                self._unwrap_into_buffer()
+                return self._unwrap_buffer[item]
+
+            # print("  --> _unwrap()[item]")
             return self._unwrap()[item]
+
+        # ----------------------------------
+        #   ringbuffer[int]
+        #   ringbuffer[list of ints]
+        #   ringbuffer[np.ndarray of ints]
+        # ----------------------------------
+
+        if hasattr(item, "__len__"):
+            item_arr = np.asarray(item)
+        else:
+            item_arr = np.asarray([item])
+
+        if not issubclass(item_arr.dtype.type, np.integer):
+            raise TypeError("RingBuffer indices must be integers.")
+
+        # Check for `List index out of range`
+        if len(self) == 0:
+            raise IndexError(
+                "RingBuffer list index out of range. The RingBuffer has "
+                "length 0."
+            )
+
+        if np.any(item_arr < -len(self)) or np.any(item_arr >= len(self)):
+            idx_under = item_arr[np.where(item_arr < -len(self))]
+            idx_over = item_arr[np.where(item_arr >= len(self))]
+            idx_oor = np.sort(np.concatenate((idx_under, idx_over)))
+            raise IndexError(
+                "RingBuffer list %s %s out of range. The RingBuffer has "
+                "length %s."
+                % (
+                    "index" if len(idx_oor) == 1 else "indices",
+                    idx_oor,
+                    len(self),
+                )
+            )
+
+        # Retrieve elements
+        if item_arr.size == 1:
+            # Single element: We can speed up the code
+            if item_arr < 0:
+                item_arr = (self._idx_R + item_arr) % self._N
+            else:
+                item_arr = (item_arr + self._idx_L) % self._N
+        else:
+            # Multiple elements
+            neg = np.where(item_arr < 0)
+            pos = np.where(item_arr >= 0)
+
+            if len(neg) > 0:
+                item_arr[neg] = (self._idx_R + item_arr[neg]) % self._N
+            if len(pos) > 0:
+                item_arr[pos] = (item_arr[pos] + self._idx_L) % self._N
+
+        # print("  --> _arr[item_arr]")
+        return self._arr[item_arr]
 
     def __iter__(self):
         # print("__iter__")
@@ -264,6 +414,5 @@ class RingBuffer(Sequence):
         else:
             return iter(self._unwrap())
 
-    # Everything else
     def __repr__(self):
         return "<RingBuffer of {!r}>".format(np.asarray(self))
