@@ -26,7 +26,7 @@ setup(
     name="dvg-ringbuffer",
     version="1.0.1",
     license="MIT",
-    description="Numpy ringbuffer at a fixed memory address to allow for significantly sped up numpy, sigpy, numba & pyFFTW calculations.",
+    description="Numpy ring buffer at a fixed memory address to allow for significantly sped up numpy, sigpy, numba & pyFFTW calculations.",
     long_description="%s\n%s"
     % (
         re.compile("^.. start-badges.*^.. end-badges", re.M | re.S).sub(
