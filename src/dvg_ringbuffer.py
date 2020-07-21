@@ -1,43 +1,44 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Numpy ringbuffer at a **fixed** memory address to allow for significantly
-sped up *numpy*, *sigpy*, *numba* & *pyFFTW*  calculations.
+"""Numpy ring buffer at a *fixed* memory address to allow for significantly
+sped up ``numpy``, ``sigpy``, ``numba`` & ``pyFFTW``  calculations.
+
+**Based on:**
+    https://pypi.org/project/numpy_ringbuffer/ by Eric Wieser.
+
+    ``DvG_RingBuffer`` can be used as a drop-in replacement for
+    ``numpy_ringbuffer`` and provides several optimizations and extra features,
+    but requires Python 3.
 
 If, and only if the ring buffer is completely full, will it return its array
 data as a contiguous C-style numpy array at a single fixed memory address per
 ring buffer instance. It does so by unwrapping the discontiguous ring buffer
 array into a second extra *unwrap* buffer that is a private member of the ring
 buffer class. This is advantegeous for other accelerated computations by, e.g.,
-*numpy*, *sigpy*, *numba*, *pyFFTW*, that benefit from being fed with
+``numpy``, ``sigpy``, ``numba`` & ``pyFFTW``, that benefit from being fed with
 contiguous arrays at the same memory address each time again, such that compiler
 optimizations and data planning are made possible.
 
 When the ring buffer is not completely full, it will return its data as a
-contiguous C-style numpy array, but at different memory addresses.
+contiguous C-style numpy array, but at different memory addresses. This is how
+the original ``numpy-buffer`` always operates.
 
 Commonly, ``collections.deque()`` is used to act as a ring buffer. The
 benefits of a deque is that it is thread safe and fast (enough) for most
-situations. However, there is an overhead whenever the deque (a list-like
-container) needs to be transformed into a numpy array. Class
-``DvG_RingBuffer()`` will outperform a ``collections.deque()`` easily
-(tested to be a factor of ~39).
+situations. However, there is an overhead whenever the deque -- a list-like
+container -- needs to be transformed into a numpy array. Because
+``DvG_RingBuffer`` already returns numpy arrays it will outperform a
+``collections.deque()`` easily, tested to be a factor of ~60.
 
 .. warning::
 
-    * This ring buffer is not thread safe. You have to implement your own
-      mutex locks when using this ring buffer class in multi-threaded routines.
+    * This ring buffer is not thread safe. You'll have to implement your own
+      mutex locks when using this ring buffer in multithreaded operations.
 
     * The data array that is returned by a full ring buffer is a pass by
       reference of the *unwrap* buffer. It is not a copy! Hence, changing
       values in the returned data array is identical to changing values in the
       *unwrap* buffer.
-
-Based on
---------
-https://pypi.org/project/numpy_ringbuffer/ by Eric Wieser.
-
-``DvG_RingBuffer`` can be used as a drop-in replacement for ``numpy_ringbuffer``
-and provides several optimizations and extra features.
 
 Methods
 -------
