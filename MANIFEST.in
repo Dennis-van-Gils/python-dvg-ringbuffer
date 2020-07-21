@@ -11,5 +11,6 @@ include .travis.yml .readthedocs.yml
 include LICENSE.txt
 include *.rst
 recursive-include images *.png
+recursive-include timeit *
 
 global-exclude *.py[cod] __pycache__/* *.so *.dylib
