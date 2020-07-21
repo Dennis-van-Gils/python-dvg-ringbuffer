@@ -16,7 +16,7 @@
 
 DvG_RingBuffer
 ==============
-Numpy ring buffer at a *fixed* memory address to allow for significantly
+Provides a numpy ring buffer at a *fixed* memory address to allow for significantly
 sped up ``numpy``, ``sigpy``, ``numba`` & ``pyFFTW``  calculations.
 
 - Github: https://github.com/Dennis-van-Gils/python-dvg-ringbuffer
@@ -64,8 +64,8 @@ container -- needs to be transformed into a numpy array. Because
       values in the returned data array is identical to changing values in the
       *unwrap* buffer.
 
-``RingBuffer(capacity, dtype=np.float64, allow_overwrite=True)``
-----------------------------------------------------------------
+Class ``RingBuffer(capacity, dtype=np.float64, allow_overwrite=True)``
+----------------------------------------------------------------------
     Create a new ring buffer with the given capacity and element type.
 
         Args:
