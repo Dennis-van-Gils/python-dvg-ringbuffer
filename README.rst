@@ -22,9 +22,9 @@ sped up* ``numpy``, ``sigpy``, ``numba`` *&* ``pyFFTW`` *calculations.*
 - Github: https://github.com/Dennis-van-Gils/python-dvg-ringbuffer
 - PyPI: https://pypi.org/project/dvg-ringbuffer
 
-Installation:
+Installation::
 
-    ``pip install dvg-ringbuffer``
+    pip install dvg-ringbuffer
 
 Based on:
 
