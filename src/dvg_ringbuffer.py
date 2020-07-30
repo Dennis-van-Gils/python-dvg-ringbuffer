@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""Numpy ring buffer at a *fixed* memory address to allow for significantly
-sped up ``numpy``, ``sigpy``, ``numba`` & ``pyFFTW``  calculations.
+"""*Provides a numpy ring buffer at a fixed memory address to allow for
+significantly sped up* ``numpy``, ``sigpy``, ``numba`` *&* ``pyFFTW``
+*calculations.*
 
 - Github: https://github.com/Dennis-van-Gils/python-dvg-ringbuffer
 - PyPI: https://pypi.org/project/dvg-ringbuffer
 
-Installation:
+Installation::
 
-    ``pip install dvg-ringbuffer``
+    pip install dvg-ringbuffer
 
 Based on:
 
@@ -51,7 +52,7 @@ container -- needs to be transformed into a numpy array. Because
 API
 ===
 
-Class ``RingBuffer(capacity, dtype=np.float64, allow_overwrite=True)``
+``class RingBuffer(capacity, dtype=np.float64, allow_overwrite=True)``
 ----------------------------------------------------------------------
     Create a new ring buffer with the given capacity and element type.
 
