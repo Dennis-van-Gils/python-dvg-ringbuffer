@@ -78,7 +78,7 @@ API
 
             dtype (``data-type``, optional):
                 Desired type of buffer elements. Use a type like ``(float, 2)``
-                to produce a buffer with shape ``(N, 2)``.
+                to produce a buffer with shape ``(capacity, 2)``.
 
                 Default: ``np.float64``
 
