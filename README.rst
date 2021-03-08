@@ -2,8 +2,8 @@
     :target: https://pypi.org/project/dvg-ringbuffer
 .. image:: https://img.shields.io/pypi/pyversions/dvg-ringbuffer
     :target: https://pypi.org/project/dvg-ringbuffer
-.. image:: https://travis-ci.org/Dennis-van-Gils/python-dvg-ringbuffer.svg?branch=master
-    :target: https://travis-ci.org/Dennis-van-Gils/python-dvg-ringbuffer
+.. image:: https://travis-ci.com/Dennis-van-Gils/python-dvg-ringbuffer.svg?branch=master
+    :target: https://travis-ci.com/Dennis-van-Gils/python-dvg-ringbuffer
 .. image:: https://coveralls.io/repos/github/Dennis-van-Gils/python-dvg-ringbuffer/badge.svg?branch=master
     :target: https://coveralls.io/github/Dennis-van-Gils/python-dvg-ringbuffer?branch=master
 .. image:: https://requires.io/github/Dennis-van-Gils/python-dvg-ringbuffer/requirements.svg?branch=master
