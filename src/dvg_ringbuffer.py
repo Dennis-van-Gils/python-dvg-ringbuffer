@@ -52,7 +52,7 @@ container -- needs to be transformed into a numpy array. Because
 API
 ===
 
-``class RingBuffer(capacity, dtype=np.float64, allow_overwrite=True)``
+``class RingBuffer(capacity, dtype=float, allow_overwrite=True)``
 ----------------------------------------------------------------------
     Create a new ring buffer with the given capacity and element type.
 
@@ -64,7 +64,7 @@ API
                 Desired type of buffer elements. Use a type like ``(float, 2)``
                 to produce a buffer with shape ``(capacity, 2)``.
 
-                Default: ``np.float64``
+                Default: ``float``
 
             allow_overwrite (``bool``, optional):
                 If ``False``, throw an IndexError when trying to append to an
@@ -80,42 +80,42 @@ Methods
 
     .. code-block:: python
 
-        rb = RingBuffer(3, dtype=np.int)  #  []
-        rb.append(1)                      #  [1]
-        rb.append(2)                      #  [1, 2]
-        rb.append(3)                      #  [1, 2, 3]
-        rb.append(4)                      #  [2, 3, 4]
+        rb = RingBuffer(3, dtype=int)  #  []
+        rb.append(1)                   #  [1]
+        rb.append(2)                   #  [1, 2]
+        rb.append(3)                   #  [1, 2, 3]
+        rb.append(4)                   #  [2, 3, 4]
 
 * ``appendleft(value)``
     Append a single value to the ring buffer from the left side.
 
     .. code-block:: python
 
-        rb = RingBuffer(3, dtype=np.int)  #  []
-        rb.appendleft(1)                  #  [1]
-        rb.appendleft(2)                  #  [2, 1]
-        rb.appendleft(3)                  #  [3, 2, 1]
-        rb.appendleft(4)                  #  [4, 3, 2]
+        rb = RingBuffer(3, dtype=int)  #  []
+        rb.appendleft(1)               #  [1]
+        rb.appendleft(2)               #  [2, 1]
+        rb.appendleft(3)               #  [3, 2, 1]
+        rb.appendleft(4)               #  [4, 3, 2]
 
 * ``extend(values)``
     Extend the ring buffer with a list of values.
 
     .. code-block:: python
 
-        rb = RingBuffer(3, dtype=np.int)  #  []
-        rb.extend([1])                    #  [1]
-        rb.extend([2, 3])                 #  [1, 2, 3]
-        rb.extend([4, 5, 6, 7])           #  [5, 6, 7]
+        rb = RingBuffer(3, dtype=int)  #  []
+        rb.extend([1])                 #  [1]
+        rb.extend([2, 3])              #  [1, 2, 3]
+        rb.extend([4, 5, 6, 7])        #  [5, 6, 7]
 
 * ``extendleft(values)``
     Extend the ring buffer with a list of values from the left side.
 
     .. code-block:: python
 
-        rb = RingBuffer(3, dtype=np.int)  #  []
-        rb.extendleft([1])                #  [1]
-        rb.extendleft([3, 2])             #  [3, 2, 1]
-        rb.extendleft([7, 6, 5, 4])       #  [7, 6, 5]
+        rb = RingBuffer(3, dtype=int)  #  []
+        rb.extendleft([1])             #  [1]
+        rb.extendleft([3, 2])          #  [3, 2, 1]
+        rb.extendleft([7, 6, 5, 4])    #  [7, 6, 5]
 
 * ``pop()``
     Remove the right-most item from the ring buffer and return it.
@@ -140,20 +140,20 @@ Indexing & slicing
 
         from dvg_ringbuffer import RingBuffer
 
-        rb = RingBuffer(4, dtype=np.int)  # --> rb[:] = array([], dtype=int32)
-        rb.extend([1, 2, 3, 4, 5])        # --> rb[:] = array([2, 3, 4, 5])
-        x = rb[0]                         # --> x = 2
-        x = rb[-1]                        # --> x = 5
-        x = rb[:3]                        # --> x = array([2, 3, 4])
-        x = rb[np.array([0, 2, -1])]      # --> x = array([2, 4, 5])
+        rb = RingBuffer(4, dtype=int)  # --> rb[:] = array([], dtype=int32)
+        rb.extend([1, 2, 3, 4, 5])     # --> rb[:] = array([2, 3, 4, 5])
+        x = rb[0]                      # --> x = 2
+        x = rb[-1]                     # --> x = 5
+        x = rb[:3]                     # --> x = array([2, 3, 4])
+        x = rb[np.array([0, 2, -1])]   # --> x = array([2, 4, 5])
 
-        rb = RingBuffer(5, dtype=(np.int, 2))  # --> rb[:] = array([], shape=(0, 2), dtype=int32)
-        rb.append([1, 2])                      # --> rb[:] = array([[1, 2]])
-        rb.append([3, 4])                      # --> rb[:] = array([[1, 2], [3, 4]])
-        rb.append([5, 6])                      # --> rb[:] = array([[1, 2], [3, 4], [5, 6]])
-        x = rb[0]                              # --> x = array([1, 2])
-        x = rb[0, :]                           # --> x = array([1, 2])
-        x = rb[:, 0]                           # --> x = array([1, 3, 5])
+        rb = RingBuffer(5, dtype=(int, 2))  # --> rb[:] = array([], shape=(0, 2), dtype=int32)
+        rb.append([1, 2])                   # --> rb[:] = array([[1, 2]])
+        rb.append([3, 4])                   # --> rb[:] = array([[1, 2], [3, 4]])
+        rb.append([5, 6])                   # --> rb[:] = array([[1, 2], [3, 4], [5, 6]])
+        x = rb[0]                           # --> x = array([1, 2])
+        x = rb[0, :]                        # --> x = array([1, 2])
+        x = rb[:, 0]                        # --> x = array([1, 3, 5])
 
 """
 __author__ = "Dennis van Gils"
@@ -167,7 +167,7 @@ import numpy as np
 
 
 class RingBuffer(Sequence):
-    def __init__(self, capacity, dtype=np.float64, allow_overwrite=True):
+    def __init__(self, capacity, dtype=float, allow_overwrite=True):
         """Create a new ring buffer with the given capacity and element type.
 
         Args:
@@ -178,7 +178,7 @@ class RingBuffer(Sequence):
                 Desired type of buffer elements. Use a type like (float, 2) to
                 produce a buffer with shape (capacity, 2).
 
-                Default: np.float64
+                Default: float
 
             allow_overwrite (bool, optional):
                 If False, throw an IndexError when trying to append to an
@@ -186,7 +186,7 @@ class RingBuffer(Sequence):
 
                 Default: True
         """
-        if dtype == np.float64:
+        if dtype == float:
             p = {"shape": capacity, "fill_value": np.nan, "order": "C"}
             self._arr = np.full(**p)
             self._unwrap_buffer = np.full(**p)  # @ fixed memory address
@@ -209,7 +209,7 @@ class RingBuffer(Sequence):
         self._idx_L = 0
         self._idx_R = 0
 
-        if self._arr.dtype == np.float64:
+        if self._arr.dtype == float:
             self._arr.fill(np.nan)
             self._unwrap_buffer.fill(np.nan)
         else:
@@ -223,11 +223,11 @@ class RingBuffer(Sequence):
     def append(self, value):
         """Append a single value to the ring buffer.
 
-        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
-        rb.append(1)                      # --> rb = [1]
-        rb.append(2)                      # --> rb = [1, 2]
-        rb.append(3)                      # --> rb = [1, 2, 3]
-        rb.append(4)                      # --> rb = [2, 3, 4]
+        rb = RingBuffer(3, dtype=int)  # --> rb = []
+        rb.append(1)                   # --> rb = [1]
+        rb.append(2)                   # --> rb = [1, 2]
+        rb.append(3)                   # --> rb = [1, 2, 3]
+        rb.append(4)                   # --> rb = [2, 3, 4]
         """
         if self.is_full:
             if not self._allow_overwrite:
@@ -246,11 +246,11 @@ class RingBuffer(Sequence):
     def appendleft(self, value):
         """Append a single value to the ring buffer from the left side.
 
-        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
-        rb.appendleft(1)                  # --> rb = [1]
-        rb.appendleft(2)                  # --> rb = [2, 1]
-        rb.appendleft(3)                  # --> rb = [3, 2, 1]
-        rb.appendleft(4)                  # --> rb = [4, 3, 2]
+        rb = RingBuffer(3, dtype=int)  # --> rb = []
+        rb.appendleft(1)               # --> rb = [1]
+        rb.appendleft(2)               # --> rb = [2, 1]
+        rb.appendleft(3)               # --> rb = [3, 2, 1]
+        rb.appendleft(4)               # --> rb = [4, 3, 2]
         """
         if self.is_full:
             if not self._allow_overwrite:
@@ -273,10 +273,10 @@ class RingBuffer(Sequence):
     def extend(self, values):
         """Extend the ring buffer with a list of values.
 
-        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
-        rb.extend([1])                    # --> rb = [1]
-        rb.extend([2, 3])                 # --> rb = [1, 2, 3]
-        rb.extend([4, 5, 6, 7])           # --> rb = [5, 6, 7]
+        rb = RingBuffer(3, dtype=int)  # --> rb = []
+        rb.extend([1])                 # --> rb = [1]
+        rb.extend([2, 3])              # --> rb = [1, 2, 3]
+        rb.extend([4, 5, 6, 7])        # --> rb = [5, 6, 7]
         """
         lv = len(values)
         if len(self) + lv > self._N:
@@ -308,10 +308,10 @@ class RingBuffer(Sequence):
     def extendleft(self, values):
         """Extend the ring buffer with a list of values from the left side.
 
-        rb = RingBuffer(3, dtype=np.int)  # --> rb = []
-        rb.extendleft([1])                # --> rb = [1]
-        rb.extendleft([3, 2])             # --> rb = [3, 2, 1]
-        rb.extendleft([7, 6, 5, 4])       # --> rb = [7, 6, 5]
+        rb = RingBuffer(3, dtype=int)  # --> rb = []
+        rb.extendleft([1])             # --> rb = [1]
+        rb.extendleft([3, 2])          # --> rb = [3, 2, 1]
+        rb.extendleft([7, 6, 5, 4])    # --> rb = [7, 6, 5]
         """
         lv = len(values)
         if len(self) + lv > self._N:
