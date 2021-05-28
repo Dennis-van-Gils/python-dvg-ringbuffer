@@ -24,7 +24,7 @@ def read(*names, **kwargs):
 
 setup(
     name="dvg-ringbuffer",
-    version="1.0.2",
+    version="1.0.3",
     license="MIT",
     description="Numpy ring buffer at a fixed memory address to allow for significantly sped up numpy, sigpy, numba & pyFFTW calculations.",
     long_description="%s\n%s"

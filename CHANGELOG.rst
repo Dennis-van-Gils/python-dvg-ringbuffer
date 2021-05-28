@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.0.3 (2021-05-28)
+------------------
+* Added dev note: Don't use numba's njit decorator on `np.concatenate()`
+
 1.0.2 (2021-05-26)
 ------------------
 * Replaced Numpy types with standard types as requested by Numpy
