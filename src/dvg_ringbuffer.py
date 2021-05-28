@@ -166,6 +166,13 @@ from collections.abc import Sequence
 import numpy as np
 
 
+# DEV NOTE:
+# One might be tempted to use a `numba.njit(nogil=True)` decorator on the
+# `numpy.concatenate()` functions appearing in this module, but timeit tests
+# reveal that it actually hurts the performance. Numpy has already optimised its
+# `concatenate()` method to maximum performance.
+
+
 class RingBuffer(Sequence):
     def __init__(self, capacity, dtype=float, allow_overwrite=True):
         """Create a new ring buffer with the given capacity and element type.
