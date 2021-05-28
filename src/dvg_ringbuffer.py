@@ -174,25 +174,26 @@ import numpy as np
 
 
 class RingBuffer(Sequence):
+    """Manages a ring buffer with the given capacity and element type.
+
+    Args:
+        capacity (int):
+            The maximum capacity of the ring buffer
+
+        dtype (data-type, optional):
+            Desired type of buffer elements. Use a type like (float, 2) to
+            produce a buffer with shape (capacity, 2).
+
+            Default: float
+
+        allow_overwrite (bool, optional):
+            If False, throw an IndexError when trying to append to an
+            already full buffer.
+
+            Default: True
+    """
+
     def __init__(self, capacity, dtype=float, allow_overwrite=True):
-        """Create a new ring buffer with the given capacity and element type.
-
-        Args:
-            capacity (int):
-                The maximum capacity of the ring buffer
-
-            dtype (data-type, optional):
-                Desired type of buffer elements. Use a type like (float, 2) to
-                produce a buffer with shape (capacity, 2).
-
-                Default: float
-
-            allow_overwrite (bool, optional):
-                If False, throw an IndexError when trying to append to an
-                already full buffer.
-
-                Default: True
-        """
         if dtype == float:
             p = {"shape": capacity, "fill_value": np.nan, "order": "C"}
             self._arr = np.full(**p)
