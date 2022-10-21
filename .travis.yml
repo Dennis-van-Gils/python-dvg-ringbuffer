@@ -13,6 +13,12 @@ jobs:
     
     - name: "py3.9"
       python: 3.9
+    
+    - name: "py3.10"
+      python: 3.10
+      
+before_install:
+  - if [[ $TRAVIS_PYTHON_VERSION == 3.7 ]]; then pip install -U importlib_metadata; fi
 
 install:
   - pip install pytest-cov
