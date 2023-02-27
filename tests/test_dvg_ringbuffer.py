@@ -195,13 +195,13 @@ class TestAll(unittest.TestCase):
         np.testing.assert_equal(r, np.array([]))
 
         # this does not error with deque(maxlen=0), so should not error here
-        try:
-            r.append(0)
-            r.appendleft(0)
-            r.extend([0])
-            r.extendleft([0])
-        except IndexError:
-            self.fail()
+        # try:
+        r.append(0)
+        r.appendleft(0)
+        r.extend([0])
+        r.extendleft([0])
+        # except IndexError:
+        #    self.fail()
 
     def test_addresses(self):
         r = RingBuffer(5)
@@ -247,8 +247,8 @@ class TestAll(unittest.TestCase):
             r[2]
 
 
-if not hasattr(TestAll, "assertRaisesRegex"):
-    TestAll.assertRaisesRegex = TestAll.assertRaisesRegexp
+# if not hasattr(TestAll, "assertRaisesRegex"):
+#    TestAll.assertRaisesRegex = TestAll.assertRaisesRegexp
 
 if __name__ == "__main__":
     unittest.main()
