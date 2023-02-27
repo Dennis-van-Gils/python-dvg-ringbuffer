@@ -4,7 +4,8 @@
     :target: https://pypi.org/project/dvg-ringbuffer
 .. image:: https://img.shields.io/pypi/pyversions/dvg-ringbuffer
     :target: https://pypi.org/project/dvg-ringbuffer
-
+.. image:: https://github.com/Dennis-van-Gils/python-dvg-ringbuffer/actions/workflows/python-package.yml/badge.svg
+    :target: https://github.com/Dennis-van-Gils/python-dvg-ringbuffer/actions/workflows/python-package.yml
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 .. image:: https://img.shields.io/badge/License-MIT-purple.svg
