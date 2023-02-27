@@ -1,16 +1,10 @@
-.. image:: https://static.pepy.tech/personalized-badge/dvg-ringbuffer?period=month&units=international_system&left_color=gray&right_color=red&left_text=%E2%86%93pm
+.. image:: https://static.pepy.tech/personalized-badge/dvg-ringbuffer?period=month&units=international_system&left_color=gray&right_color=blue&left_text=%E2%86%93pm
     :target: https://pepy.tech/project/dvg-ringbuffer
 .. image:: https://img.shields.io/pypi/v/dvg-ringbuffer
     :target: https://pypi.org/project/dvg-ringbuffer
 .. image:: https://img.shields.io/pypi/pyversions/dvg-ringbuffer
     :target: https://pypi.org/project/dvg-ringbuffer
-.. image:: https://travis-ci.com/Dennis-van-Gils/python-dvg-ringbuffer.svg?branch=master
-    :target: https://travis-ci.com/Dennis-van-Gils/python-dvg-ringbuffer
-.. image:: https://coveralls.io/repos/github/Dennis-van-Gils/python-dvg-ringbuffer/badge.svg?branch=master
-    :target: https://coveralls.io/github/Dennis-van-Gils/python-dvg-ringbuffer?branch=master
-.. image:: https://requires.io/github/Dennis-van-Gils/python-dvg-ringbuffer/requirements.svg?branch=master
-    :target: https://requires.io/github/Dennis-van-Gils/python-dvg-ringbuffer/requirements/?branch=master
-    :alt: Requirements Status
+
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
 .. image:: https://img.shields.io/badge/License-MIT-purple.svg

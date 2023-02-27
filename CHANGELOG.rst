@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.0.4 (2023-02-27)
+------------------
+* Deprecated `requires.io` and `travis`
+
 1.0.3 (2021-05-28)
 ------------------
 * Added dev note: Don't use numba's njit decorator on `np.concatenate()`
