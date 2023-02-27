@@ -1,4 +1,4 @@
-.. image:: https://static.pepy.tech/personalized-badge/dvg-ringbuffer?period=month&units=international_system&left_color=gray&right_color=blue&left_text=%E2%86%93pm
+.. image:: https://static.pepy.tech/personalized-badge/dvg-ringbuffer?period=month&units=international_system&left_color=gray&right_color=blue&left_text=%E2%86%93%20per%20month
     :target: https://pepy.tech/project/dvg-ringbuffer
 .. image:: https://img.shields.io/pypi/v/dvg-ringbuffer
     :target: https://pypi.org/project/dvg-ringbuffer
