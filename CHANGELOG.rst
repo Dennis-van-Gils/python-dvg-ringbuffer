@@ -1,6 +1,10 @@
 Changelog
 =========
 
+1.1.0 (2024-06-22)
+------------------
+* Support for Numpy 2 without any need for changes
+
 1.0.4 (2023-02-27)
 ------------------
 * Deprecated `requires.io` and `travis`
